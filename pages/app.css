@@ -1,0 +1,87 @@
+a{
+    text-decoration: none !important;
+}
+
+button{
+    display: flex;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.toast.err-toast .toast-header{
+    color: var(--bs-body-color);
+    background-color: #D95D56;
+}
+
+.toast.err-toast .toast-body{
+    background-color: #E38580;
+}
+
+.table-non-fluid{
+    width: max-content !important;
+}
+
+.ck.ck-content{
+    background-color: #f8f8f8;
+    border: 1px solid lightgray;
+    border-top: none;
+}
+
+.toast-container{
+    position: fixed;
+    bottom: 0;
+}
+
+.spinner-wrapper{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: rgba(255,255,255,0.5);
+}
+
+.fixed.spinner-wrapper{
+    position: fixed;
+}
+
+.tooltip-box:hover div[data-id="tooltip"]{
+    transition: 0.5s ease-in; /* search about "all" - why using ease will make the tooltip jump for the first time*/
+    transition-delay: 1.5s;
+}
+
+.inline.page-title{
+    display: inline-block;
+    margin: 0 10px 0 0;
+}
+
+.page-title-box{
+    margin: 0 0 20px;
+}
+
+.app-segment .pages-segment{
+    padding: 53px 0 0;
+}
+
+.app-segment .ck.ck-content{
+    min-height: 140px;
+    max-height: 400px;
+}
+
+.app-segment div.ck-editor-content-output figure.table > table{
+    width: 100%;
+}
+
+table tr.note-row{
+    position: relative;
+}
+
+table tr.note-row td.note-row-spinner-container{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
