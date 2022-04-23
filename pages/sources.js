@@ -1,19 +1,19 @@
-import { useContext, Fragment } from 'react';
+import { Fragment } from 'react';
+
+import { useSelector } from 'react-redux';
 
 import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
-
-import AuthContext from '../contexts/auth-context';
 
 import PageUnaccessibilityMsg from '../components/PageUnaccessibilityMsg';
 
 function Sources(){
 
-    const authContext = useContext(AuthContext);
+    const auth = useSelector(state => state.auth);
 
     return (
         <div className="sources-page p-3">
             {
-                !authContext.userIsSignedIn ?
+                !auth.userIsSignedIn ?
                 <PageUnaccessibilityMsg/>
                 :
                 <Fragment>
@@ -22,8 +22,8 @@ function Sources(){
                             Sources
                         </h4>
                         <NotableElementInfoIcon 
-                            elementLocation = 'sources-page'
-                            elementName = 'sources-page'
+                            notableElementLocation = 'sources-page'
+                            notableElementName = 'sources-page'
                         />
                     </div>
                 </Fragment>

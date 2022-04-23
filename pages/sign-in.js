@@ -1,24 +1,26 @@
-import React, { useContext, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
+
+import { useDispatch } from 'react-redux';
+
+import { signIn } from '../store/auth-actions';
 
 import { useRouter } from 'next/router';
-
-import AuthContext from '../contexts/auth-context';
 
 import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
 
 import { useHttpClient } from '../shared/hooks/http-hook';
 
-// import { render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import ToastComponent from '../components/ToastComponent';
 
-import Toast from '../components/Toast';
+// import Toast from '../components/Toast'; // جهت استفاده بررسی شود
 
 import ReactDOM from 'react-dom';
 
 function SignIn(){
 
-    const authContext = useContext(AuthContext);
+    const dispatch = useDispatch();
 
     const { isLoading , sendReq } = useHttpClient();
 
@@ -122,18 +124,18 @@ function SignIn(){
                 }),
             );
 
-            authContext.signInHandler();
+            dispatch(signIn());
        
-            router.push('../home', { replace: true });
+            router.push('/home');
         }catch(err){
-            // render(
-            //     ReactDOM.createPortal(
-            //         <ToastComponent
-            //             errMsg = {err.message}
-            //         />,
-            //         document.getElementById('toasts-container-root')
-            //     )
-            // );
+            render(
+                ReactDOM.createPortal(
+                    <ToastComponent
+                        errMsg = {err.message}
+                    />,
+                    document.getElementById('toasts-container-root')
+                )
+            );
         }
     }
 
@@ -160,8 +162,8 @@ function SignIn(){
                                 </label>
                             </div> 
                             <NotableElementInfoIcon 
-                                elementLocation = 'sign-in-page'
-                                elementName = 'sign-in-page'
+                                notableElementLocation = 'sign-in-page'
+                                notableElementName = 'sign-in-page'
                             />  
                         </div>   
                         <div className='sign-in-form'>

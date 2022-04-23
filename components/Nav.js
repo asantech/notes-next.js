@@ -1,10 +1,12 @@
-import React, { useContext, Fragment, useState, useCallback } from 'react';
+import { Fragment, useState, useEffect, useCallback } from 'react';
 
 import ReactDOM from 'react-dom';
 
-import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
-import AuthContext from '../contexts/auth-context';
+import { signOut } from '../store/auth-actions';
+
+import Link from 'next/link';
 
 import { useHttpClient } from '../shared/hooks/http-hook';
  
@@ -14,7 +16,7 @@ import { Button, Modal } from 'react-bootstrap';
 
 import { HouseDoorFill, Plus, CardText, BoxArrowInRight, Gear ,InfoCircle ,JournalText, FolderPlus, Folder, Diagram3, PersonPlusFill, PersonCircle, QuestionCircle} from 'react-bootstrap-icons';
 
-import './Nav.css';
+import classes from './Nav.module.css';
  
 function Nav(props){
 
@@ -23,7 +25,9 @@ function Nav(props){
         setLang = props.setLang
     ;
 
-    const authContext = useContext(AuthContext);
+    const auth = useSelector(state => state.auth);
+    const dispatch = useDispatch();
+
     const [showSettingsModal, setSettingsModalDisplay] = useState(false);
 
     function changeLangHandler(){
@@ -53,7 +57,7 @@ function Nav(props){
         },[]);
 
         function onEnterHandler(){
-            fetchSettingsDataHandler();
+            // fetchSettingsDataHandler();
         }
 
         function serverCodeTypeRadioBtnOnClickHandler(e){
@@ -168,125 +172,134 @@ function Nav(props){
         setSettingsModalDisplay(true);
     }
 
-    function exitBtnOnClickHandler(){
-        authContext.signOutHandler();
+    function signOutBtnOnClickHandler(){
+        dispatch(signOut());
     }
+
+    useEffect(()=>{
+        ReactDOM.createPortal(
+            <SettingsModal/>,
+            document.getElementById('overlay-root')
+        );
+    },[]);
  
     return (
         <Fragment>
-            <nav>
+            <nav className={classes['nav']}>
                 {
-                    !authContext.userIsSignedIn && 
+                    !auth.userIsSignedIn && 
                     <>
-                        <span className="log-in-page-welcome-msg">
+                        <span className={classes['log-in-page-welcome-msg']}>
                             You will get the best user experience by using Notes app :-)
                         </span>
-                        <ul className='logged-out-nav-links-list nav-links-list'>
-                            <li>
-                                <Link to="/sign-in" className="tooltip-box" exact="true" data-tip data-for="sign-in-tip">
+                        <ul className={classes['nav-links-list']}>
+                            <li className={classes['right-aligned']}> 
+                                <Link href="/sign-in" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="sign-in-tip">
                                     <PersonCircle/>
-                                    <ReactTooltip id="sign-in-tip" place="bottom" effect="solid">
-                                        Sign In
-                                    </ReactTooltip>
                                 </Link>
+                                <ReactTooltip id="sign-in-tip" place="bottom" effect="solid">
+                                    Sign In
+                                </ReactTooltip>
                             </li>
                             <li>
-                                <Link to="/sign-up" className="tooltip-box" exact="true" data-tip data-for="sign-up-tip">
+                                <Link href="/sign-up" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="sign-up-tip">
                                     <PersonPlusFill/>
-                                    <ReactTooltip id="sign-up-tip" place="bottom" effect="solid">
-                                        Sign Up
-                                    </ReactTooltip>
                                 </Link>
+                                <ReactTooltip id="sign-up-tip" place="bottom" effect="solid">
+                                    Sign Up
+                                </ReactTooltip>
                             </li>
                         </ul>
                     </>
                 }
                 {
-                    authContext.userIsSignedIn &&
-                    <ul className='logged-in-nav-links-list nav-links-list'>
+                    auth.userIsSignedIn &&
+                    <ul className={classes['logged-in-nav-links-list']+' '+classes['nav-links-list']}>
                         <li>
-                            <Link to="/home" className="tooltip-box" exact="true" data-tip data-for="home-tip">
+                            <Link href="/home" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="home-tip">
                                 <HouseDoorFill/>
-                                <ReactTooltip id="home-tip" place="bottom" effect="solid" arrow>
-                                    Home
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="home-tip" place="bottom" effect="solid" arrow>
+                                Home
+                            </ReactTooltip>
                         </li>
                         <li>
-                            <Link to="/add-scope" className="tooltip-box" exact="true" data-tip data-for="add-scope-tip">
+                            <Link href="/scope" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="scope-tip">
                                 <FolderPlus/>
-                                <ReactTooltip id="add-scope-tip" place="bottom" effect="solid" arrow>
-                                    Add Scope
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="scope-tip" place="bottom" effect="solid" arrow>
+                                Scope
+                            </ReactTooltip>
                         </li>
                         <li className='tooltip-box'>
-                            <Link to="/scopes-management" exact="true" data-tip data-for="scopes-managment">
+                            <Link href="/scope-management" activeclassname="active" exact="true" data-tip data-for="scope-managment">
                                 <Folder/>
-                                <ReactTooltip id="scopes-managment" place="bottom" effect="solid">
-                                    Scopes Managment
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="scope-managment" place="bottom" effect="solid">
+                                Scope Managment
+                            </ReactTooltip>
                         </li>
                         <li>
-                            <Link to="/note" className="tooltip-box" exact="true" data-tip data-for="note-tip">
-                                <Plus/><CardText/>
-                                <ReactTooltip id="note-tip" place="bottom" effect="solid" arrow>
-                                    Note
-                                </ReactTooltip>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/notes-management" className="tooltip-box" exact="true" data-tip data-for="notes-management-tip">
+                            <Plus/>
+                            <Link href="/note" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="note-tip">
                                 <CardText/>
-                                <ReactTooltip id="notes-management-tip" place="bottom" effect="solid">
-                                    Notes Management
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="note-tip" place="bottom" effect="solid" arrow>
+                                Note
+                            </ReactTooltip>
                         </li>
                         <li>
-                            <Link to="/add-element-note" className="tooltip-box" exact="true" data-tip data-for="add-element-note-tip">
-                                <Plus/><JournalText/>
-                                <ReactTooltip id="add-element-note-tip" place="bottom" effect="solid">
-                                    Element Note
-                                </ReactTooltip>
+                            <Link href="/note-management" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="note-management-tip">
+                                <CardText/>
                             </Link>
+                            <ReactTooltip id="note-management-tip" place="bottom" effect="solid">
+                                Note Management
+                            </ReactTooltip>
                         </li>
                         <li>
-                            <Link to="/element-note-management" className="tooltip-box" exact="true" data-tip data-for="element-note-management-tip">
+                            <Plus/>
+                            <Link href="/element-note" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="element-note-tip">
                                 <JournalText/>
-                                <ReactTooltip id="element-note-management-tip" place="bottom" effect="solid">
-                                    Element Note Management
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="element-note-tip" place="bottom" effect="solid">
+                                Element Note
+                            </ReactTooltip>
                         </li>
                         <li>
-                            <Link to="/sources" className="tooltip-box" exact="true" data-tip data-for="sources-tip">
+                            <Link href="/element-note-management" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="element-note-management-tip">
+                                <JournalText/>
+                            </Link>
+                            <ReactTooltip id="element-note-management-tip" place="bottom" effect="solid">
+                                Element Note Management
+                            </ReactTooltip>
+                        </li>
+                        <li>
+                            <Link href="/sources" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="sources-tip">
                                 <Diagram3/>
-                                <ReactTooltip id="sources-tip" place="bottom" effect="solid">
-                                    Sources
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="sources-tip" place="bottom" effect="solid">
+                                Sources
+                            </ReactTooltip>
                         </li>
                         <li>
-                            <Link to="/app-info" className="tooltip-box" exact="true" data-tip data-for="app-info-tip">
+                            <Link href="/app-info" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="app-info-tip">
                                 <InfoCircle/>
-                                <ReactTooltip id="app-info-tip" place="bottom" effect="solid">
-                                    App Info
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="app-info-tip" place="bottom" effect="solid">
+                                App Info
+                            </ReactTooltip>
                         </li>
-                        <li className="right-aligned">
-                            <Link to="/help-center" className="tooltip-box" exact="true" data-tip data-for="help-center-tip">
+                        <li className={classes['right-aligned']}>
+                            <Link href="/help-center" className="tooltip-box" activeclassname="active" exact="true" data-tip data-for="help-center-tip">
                                 <QuestionCircle/>
-                                <ReactTooltip id="help-center-tip" place="bottom" effect="solid">
-                                    App Info
-                                </ReactTooltip>
                             </Link>
+                            <ReactTooltip id="help-center-tip" place="bottom" effect="solid">
+                                Help Center
+                            </ReactTooltip>
                         </li>
                         {
                             selectedLang === 'fa' && 
-                            <li className='small bordered padded' onClick={changeLangHandler}>
+                            <li className={classes['small bordered padded']} onClick={changeLangHandler}>
                                 <button>
                                     En
                                 </button>
@@ -294,7 +307,7 @@ function Nav(props){
                         }
                         {
                             selectedLang === 'en' && 
-                            <li className='small bordered padded' onClick={changeLangHandler}>
+                            <li className={classes['small bordered padded']} onClick={changeLangHandler}>
                                 <button>
                                     Fa
                                 </button>
@@ -306,17 +319,17 @@ function Nav(props){
                             </button>
                         </li>
                         <li>
-                            <Link to="/" exact="true" onClick={exitBtnOnClickHandler}>
+                            <Link href="/" activeclassname="active" exact="true" onClick={signOutBtnOnClickHandler}>
                                 <BoxArrowInRight/>
                             </Link>
                         </li>
                     </ul>
                 }
             </nav>
-            {ReactDOM.createPortal(
+            {/* {ReactDOM.createPortal(
                 <SettingsModal/>,
                 document.getElementById('overlay-root')
-            )}
+            )} */}
         </Fragment>
     );
 }

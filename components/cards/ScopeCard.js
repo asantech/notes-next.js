@@ -1,4 +1,4 @@
-// import './ScopeCard.css';
+import classes from './ScopeCard.module.css';
 
 function ScopeCard(props){
     

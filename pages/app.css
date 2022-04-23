@@ -28,7 +28,7 @@ button{
     border-top: none;
 }
 
-.toast-container{
+#toasts-container-root{
     position: fixed;
     bottom: 0;
 }

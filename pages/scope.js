@@ -1,18 +1,18 @@
-import React , { useContext, useState , Fragment } from 'react';
+import { useState , Fragment } from 'react';
 
-// import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { useSelector } from 'react-redux';
 
-// import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
 
 import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
 
-import { useHttpClient } from '../shared/hooks/http-hook';
+import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
-import AuthContext from '../contexts/auth-context';
+import { useHttpClient } from '../shared/hooks/http-hook';
 
 import PageUnaccessibilityMsg from '../components/PageUnaccessibilityMsg';
 
-function AddScope(){
+function Scope(){
 
     const [name, setName] = useState('');
     const [nameIsValid,setNameIsValid] = useState(true);
@@ -21,7 +21,7 @@ function AddScope(){
 
     const {isLoading, sendReq} = useHttpClient();
 
-    const authContext = useContext(AuthContext);
+    const auth = useSelector(state => state.auth);
 
     const nameInputChangeHandler = event => {
         setName(event.target.value);
@@ -67,7 +67,7 @@ function AddScope(){
     return (
         <div className="add-scope-page p-3">
             {
-                !authContext.userIsSignedIn ?
+                !auth.userIsSignedIn ?
                 <PageUnaccessibilityMsg/>
                 :
                 <Fragment>
@@ -81,8 +81,8 @@ function AddScope(){
                                     Add Scope
                                 </h4>
                                 <NotableElementInfoIcon 
-                                    elementLocation = 'add-scope-page'
-                                    elementName = 'add-scope-page'
+                                    notableElementLocation = 'scope-page'
+                                    notableElementName = 'scope-page'
                                 />
                             </div>
                             <div className="p-2 col-md-6">
@@ -94,7 +94,7 @@ function AddScope(){
                             </div>
                             <div className="p-2 col-md-10">
                                 <label className="form-label">Description</label>
-                                {/* <CKEditor
+                                <CKEditor
                                     editor={ DecoupledEditor }
                                     config={ {
                                         height: '500px', // روی این کار شود
@@ -116,7 +116,7 @@ function AddScope(){
                                     onBlur = {(evt,editor) => {
                                         setCKEditorContent(editor.getData());   
                                     }}
-                                /> */}
+                                />
                             </div>
                             <div className="p-2 col-md-12">
                                 <button type="submit" className="add-btn btn btn-primary" onClick={addScopeHandler}>
@@ -156,4 +156,4 @@ function AddScope(){
     ); 
 }
 
-export default AddScope;
+export default Scope;

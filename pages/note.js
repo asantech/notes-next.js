@@ -1,16 +1,16 @@
-import { useContext, useState, useEffect, useCallback, useReducer , Fragment } from 'react';
+import { useState, useEffect, useCallback, useReducer , Fragment } from 'react';
+
+import { useSelector } from 'react-redux';
 
 import { useRouter } from 'next/router';
 
-// import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
 
-// import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
 import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
 
 import { useHttpClient } from '../shared/hooks/http-hook';
-
-import AuthContext from '../contexts/auth-context';
 
 import PageUnaccessibilityMsg from '../components/PageUnaccessibilityMsg';
 
@@ -150,16 +150,16 @@ function Note(){
         },
     ];
 
-    const authContext = useContext(AuthContext);
+    const auth = useSelector(state => state.auth);
     const router = useRouter();
-    console.log(router);
 
     const [scopeDatas, setScopeData] = useState([]);
     const [type, setType] = useState(0);
     const [selectedScopeId, setSelectedScopeId] = useState('');
     const [ckEditorContent, setCKEditorContent] = useState('');
 
-    const [pageMode, setPageMode] = useState(null);
+    // let [pageMode, setPageMode] = useState(null);
+    let pageMode = null;
 
     const [titleState, dispatchTitle] = useReducer(titleReducer, {
         value: '',
@@ -240,20 +240,27 @@ function Note(){
         });
     }
 
+    function ResetInputs(){
+        dispatchTitle({});
+        setType(0);
+        dispatchSrc({
+            type: 'SRC_RESET',
+        });
+        setCKEditorContent('');
+    }
+
     const fetchScopesHandler = useCallback(async () => {
 
         try{
             const resData = await sendReq('http://localhost:5000/api/scopes');
 
             setScopeData(resData);
-
-            // console.log('pageMode',pageMode);
-
-            // if( 
-            //     pageMode === 'add' &&
-            //     resData.length 
-            // )
-            //     setSelectedScopeId(resData[0]._id);
+ 
+            if( 
+                pageMode === 'add' &&
+                resData.length 
+            )
+                setSelectedScopeId(resData[0].name);
         }catch(err){
 
         }
@@ -269,7 +276,7 @@ function Note(){
 
         dispatchSrc({
             type: 'SRC_ON_SUBMIT',
-        })
+        });
 
         if(!titleState.isValid)  
             validationErrsMsgs.push('title is empty');
@@ -305,7 +312,7 @@ function Note(){
                         srcTypeId: srcState.id,
                         note: ckEditorContent,
                     };
-
+       
                     if(pageMode === 'edit')
                         paramsObj._id = router.query._id;
 
@@ -319,15 +326,10 @@ function Note(){
                 }())
             );
 
-            (function ResetAllELements(){
-                if(pageMode === 'add'){
-                    dispatchTitle({});
-                    setType(0);
-                    dispatchSrc({
-                        type: 'SRC_RESET',
-                    });
-                    setCKEditorContent('');
-                }else
+            (function AfterSubmitSuccess(){
+                if(pageMode === 'add')
+                    ResetInputs();
+                else if(pageMode === 'edit')
                     router.push('/notes-management');
             })();
         }catch(err){
@@ -335,16 +337,18 @@ function Note(){
         }
     }
 
+    let locationState = router.query;
+    if(!locationState)
+        pageMode = 'add';
+    else if(locationState && ('_id' in locationState))
+        pageMode = 'edit';
+
     useEffect(() => {
 
-        let locationState = router.query;
-        if(!locationState)
-            setPageMode('add');
-        if(
-            locationState &&
-            '_id' in locationState
-        ){
-            setPageMode('edit');
+        if(pageMode === 'add')
+            ResetInputs();
+        else if(pageMode === 'edit'){
+            
             dispatchTitle({
                 type: 'INPUT_ON_CHANGE',
                 val: locationState.title,
@@ -375,17 +379,16 @@ function Note(){
 
             setCKEditorContent(locationState.note);
         }
-    },[]);
+    },[pageMode]);
 
     useEffect(() => {
         fetchScopesHandler();
     },[fetchScopesHandler]);
 
-    // console.log('add note component is rendered');
     return (
         <div className="add-note-page p-3">
             {
-                !authContext.userIsSignedIn ?
+                !auth.userIsSignedIn ?
                 <PageUnaccessibilityMsg/>
                 :
                 <Fragment>
@@ -397,8 +400,8 @@ function Note(){
                             {pageMode === 'add' ? 'Add' : 'Edit'} Note
                         </h4>
                         <NotableElementInfoIcon 
-                            elementLocation = 'add-note-page'
-                            elementName = 'add-note-page'
+                            notableElementLocation = 'add-note-page'
+                            notableElementName = 'add-note-page'
                         />
                     </div>
                     <div className="add-note-segment">
@@ -431,7 +434,7 @@ function Note(){
                                 <select className="form-select" aria-label="Default select example" value={selectedScopeId} onChange={scopeOnChangeHandler}>
                                     {
                                         scopeDatas.map((scope) => (
-                                            <option key={scope._id} value={scope._id}>{scope.name}</option>
+                                            <option key={scope._id} value={scope.name}>{scope.name}</option>
                                         ))
                                     }
                                 </select>
@@ -463,7 +466,7 @@ function Note(){
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Content</label>
-                            {/* <CKEditor
+                            <CKEditor
                                 onReady={ editor => {
 
                                     if(editor)
@@ -483,7 +486,7 @@ function Note(){
                                 }}
                                 data = {ckEditorContent}
                                 editor={ DecoupledEditor }
-                            /> */}
+                            />
                         </div>
                         {
                             pageMode === 'add' &&

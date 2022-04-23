@@ -1,20 +1,20 @@
-import { useContext, useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 
-// import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
 
-// import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
 import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
 
 import { useHttpClient } from '../shared/hooks/http-hook';
 
-import AuthContext from '../contexts/auth-context';
+import { useSelector } from 'react-redux';
 
 import PageUnaccessibilityMsg from '../components/PageUnaccessibilityMsg';
 
-function AddElementNote(){
-    // اجرا شدن کد جاوا اسکریپت را براساس ورود داشتن فرد شرطی شود
-    const authContext = useContext(AuthContext);
+function ElementNote(){
+
+    const auth = useSelector(state => state.auth);
   
     const {isLoading, sendReq} = useHttpClient();
     
@@ -110,7 +110,7 @@ function AddElementNote(){
     return (
         <div className="add-element-note-page p-3">
             {
-                !authContext.userIsSignedIn ?
+                !auth.userIsSignedIn ?
                 <PageUnaccessibilityMsg/>
                 :
                 <Fragment>
@@ -122,8 +122,8 @@ function AddElementNote(){
                             Element Note
                         </h4>
                         <NotableElementInfoIcon 
-                            elementLocation = 'add-element-note-page'
-                            elementName = 'add-element-note-page'
+                            notableElementLocation = 'add-element-note-page'
+                            notableElementName = 'add-element-note-page'
                         />
                     </div>
                     <div className="add-element-note-segment">
@@ -156,7 +156,7 @@ function AddElementNote(){
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Content</label>
-                            {/* <CKEditor
+                            <CKEditor
                                 onReady={ editor => {
 
                                     if(editor) // روش های دیگر هم بررسی شود
@@ -176,7 +176,7 @@ function AddElementNote(){
                                 }}
                                 data = {ckEditorContent}
                                 editor={DecoupledEditor}
-                            /> */}
+                            />
                         </div>
                         <button type="button" className='add-btn btn btn-success' onClick={saveElementNoteHandler}>
                             Save
@@ -188,4 +188,4 @@ function AddElementNote(){
     ); 
 }
 
-export default AddElementNote;
+export default ElementNote;

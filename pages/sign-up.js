@@ -1,4 +1,8 @@
-import { useContext, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
+
+import { useDispatch } from 'react-redux';
+
+import { signIn } from '../store/auth-actions'
 
 import { useRouter } from 'next/router';
 
@@ -6,11 +10,9 @@ import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
 
 import { useHttpClient } from '../shared/hooks/http-hook';
 
-import AuthContext from '../contexts/auth-context';
-
 function SignUp(){
 
-    const router = useRouter();
+    let router = useRouter();
     const usernameInputRef = useRef();
     const emailInputRef = useRef();
     const cellphoneNumInputRef = useRef();
@@ -23,7 +25,7 @@ function SignUp(){
 
     const { sendReq } = useHttpClient();
 
-    const authContext = useContext(AuthContext);
+    const dispatch = useDispatch();
  
     function signUpFormDimmerDisplay(val){
         if(arguments.length){
@@ -223,9 +225,9 @@ function SignUp(){
                 }),
             );
  
-            signUpFormDimmerDisplay('hide'); // بررسی شود که چرا پس از اجرا شدن authContext.signInHandler خطا می دهد که spinner وجود ندارد
-            authContext.signInHandler();
-            router.push('../home', { replace: true });
+            signUpFormDimmerDisplay('hide'); 
+            dispatch(signIn());
+            router.push('/');
         }catch(err){
             signUpFormDimmerDisplay('hide');
         }
@@ -261,8 +263,8 @@ function SignUp(){
                                 </label>
                             </div>    
                             <NotableElementInfoIcon 
-                                elementLocation = 'sign-up-page'
-                                elementName = 'sign-up-page'
+                                notableElementLocation = 'sign-up-page'
+                                notableElementName = 'sign-up-page'
                             />
                         </div>     
                         <div className='sign-in-form'>

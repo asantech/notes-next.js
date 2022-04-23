@@ -1,4 +1,6 @@
-import { useContext, useState, useCallback, useEffect, Fragment } from 'react';
+import { useState, useCallback, useEffect, Fragment } from 'react';
+
+import { useSelector } from 'react-redux';
 
 import { useRouter } from 'next/router';
 
@@ -7,8 +9,6 @@ import { Pencil, Trash, Eye, ArrowRepeat } from 'react-bootstrap-icons';
 import NotableElementInfoIcon from '../components/NotableElementInfoIcon';
 
 import { confirmDel } from '../shared/funcs/ConfirmDel';
-
-import AuthContext from '../contexts/auth-context';
 
 import { useHttpClient } from '../shared/hooks/http-hook';
 
@@ -54,7 +54,7 @@ function NoteListRow(props){
         <tr className='note-row' data-id={props.note._id}>
             <td>{props.i + 1}</td>
             <td>{props.note.title}</td>
-            {/* <td>{note.scope}</td> */}
+            <td>{props.note.scopeId}</td>
             <td>
                 <div className="btn-group me-2" role="group" aria-label="First group">
                     <button type="button" className="btn btn-warning btn-sm" onClick={ObserveNoteBtnOnClickHandler}>
@@ -78,13 +78,12 @@ function NoteListRow(props){
                 </div> 
             </td>
         </tr>
-    )
-
+    );
 }
 
 function NotesManagement(){
 
-    const authContext = useContext(AuthContext);
+    const auth = useSelector(state => state.auth);
   
     const {isLoading: notesAreloading, sendReq: sendLoadNotesReq, err: loadNotesErr, clearErr: clearLoadNotesErr} = useHttpClient();
 
@@ -145,7 +144,7 @@ function NotesManagement(){
     return (
         <div className="notes-management-page p-3">
             {
-                !authContext.userIsSignedIn ?
+                !auth.userIsSignedIn ?
                     <PageUnaccessibilityMsg/>
                 :
                     <Fragment>
@@ -154,8 +153,8 @@ function NotesManagement(){
                                 Notes Management
                             </h4>
                             <NotableElementInfoIcon 
-                                elementLocation = 'notes-management-page'
-                                elementName = 'notes-management-page'
+                                notableElementLocation = 'notes-management-page'
+                                notableElementName = 'notes-management-page'
                             />
                             <ArrowRepeat className='m-2' onClick={refreshNotesList}/>
                         </div>    
@@ -165,7 +164,7 @@ function NotesManagement(){
                                     <tr>
                                         <th className="col">R</th>
                                         <th className="col">Note Title</th>
-                                        {/* <th className="col">Scope</th> */}
+                                        <th className="col">Scope</th>
                                         <th className="col">Actions</th>
                                     </tr>
                                 </thead>

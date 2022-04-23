@@ -1,77 +1,31 @@
-import { useContext, useState, useEffect, useCallback, Fragment } from 'react';
+import { useCallback, useEffect } from 'react';
 
-import ScopeCard from '../components/cards/ScopeCard';
+import { useRouter } from 'next/router';
 
-import { useHttpClient } from '../shared/hooks/http-hook';
+import { useSelector, useDispatch } from 'react-redux';
 
-import classes from './home.module.css';
+import { isSignedIn } from '../store/auth-actions';
 
-import AuthContext from '../contexts/auth-context';
+function Index(){
 
-import PageUnaccessibilityMsg from '../components/PageUnaccessibilityMsg';
-
-function Home(){
-
-    const authContext = useContext(AuthContext);
-
-    const { sendReq, err, clearErr } = useHttpClient();
-
-    const [scopeDatas, setScopeData] = useState([]);
-    const [isLoadingCards, setLoadingCards] = useState(false);
-
-    const fetchScopesHandler = useCallback(async () => {
-
-        setLoadingCards(true);
-        clearErr(); // چرا اینجا؟
-
-        try{
-            const resData = await sendReq('http://localhost:5000/api/scopes');
-            setScopeData(resData);
-        }catch(err){
- 
-        }
-
-        setLoadingCards(false);
+    const auth = useSelector(state => state.auth);
+    const router = useRouter();
+    const dispatch = useDispatch();
+  
+    const a = useCallback(()=>{
+        dispatch(isSignedIn());
+        console.log(auth.userIsSignedIn)
+        if(auth.userIsSignedIn === false)
+            router.push('/sign-in');
+        else if(auth.userIsSignedIn === true)
+            router.push('/home');
     },[]);
 
-    useEffect(() => {
-        fetchScopesHandler();
-    },[fetchScopesHandler]);
+    useEffect(()=>{
+        a();
+    },[])
 
-    let content = <p>No subjects added</p>;
-
-    if(scopeDatas.length > 0)
-        content = scopeDatas.map((scope,i) => (
-            <ScopeCard
-                key = {'scope'+i}
-                name = {scope.name}
-            />
-        ));
-
-    if(err)
-        content = <p>{err}</p>;
-
-    if(isLoadingCards)
-        content = <p>Loading ...</p>;
-
-    return (
-        <div className="home-page p-3">
-            {
-                !authContext.userIsSignedIn ?
-                <PageUnaccessibilityMsg/>
-                :
-                <Fragment>
-                    <div className="row">
-                        <div className="subject-cards-segment">
-                            <div className="subject-cards-container">
-                                {content}
-                            </div>
-                        </div>
-                    </div>
-                </Fragment>
-            }
-        </div>
-    ); 
+    return <div className='index-page'></div>; 
 }
 
-export default Home;
+export default Index;

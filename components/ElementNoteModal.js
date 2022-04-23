@@ -1,32 +1,39 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
+
+import { useSelector, useDispatch } from 'react-redux';
+
+import { notableElementActions } from '../store/notableElement-slice';
 
 import { Button, Modal } from 'react-bootstrap';
 
-import NotableElementsContext from '../contexts/notable-elements-context';
-
 import { useHttpClient } from '../shared/hooks/http-hook';
 
-// import './ElementNoteModal.css';
+import classes from './ElementNoteModal.module.css';
  
 function ElementNoteModal() {
+    
+    const notableElementLocation = useSelector(state => state.notableElement.location);
+    const notableElementName = useSelector(state => state.notableElement.name);
+    const notableElementModalDisplay = useSelector(state => state.notableElement.modalDisplay);
+    const dispatch = useDispatch();
 
-    const notableElementsContext = useContext(NotableElementsContext);
-
-    const handleClose = () => notableElementsContext.setElementNoteModalDisplay(false);
+    const handleClose = () => {
+        dispatch(notableElementActions.setElementNoteModalDisplay(false));
+    };
     const [elementNote, setElementNote] = useState();
 
     const {isLoading, sendReq} = useHttpClient();
 
     const fetchElementDataHandler = useCallback(async () => {
-
+ 
         try{
             const resData = await sendReq(
                 'http://localhost:5000/api/elements-notes/',
                 'POST',
                 undefined,
                 JSON.stringify({
-                    elementNoteLocation: notableElementsContext.elementNoteLocation,
-                    elementNoteName: notableElementsContext.elementNoteName,
+                    elementNoteLocation: notableElementLocation,
+                    elementNoteName: notableElementName,
                 }),
             );
 
@@ -34,7 +41,7 @@ function ElementNoteModal() {
         }catch(err){
  
         }
-    },[sendReq,notableElementsContext]); 
+    },[sendReq,notableElementLocation,notableElementName]); 
 
     function onEnterHandler(){
         fetchElementDataHandler();
@@ -42,16 +49,17 @@ function ElementNoteModal() {
 
     function onExitedHandler(){
         setElementNote('');
+        dispatch(notableElementActions.reset());
     }
 
     return (
         <Modal 
-          bsPrefix="element-note-modal modal"
-          show={notableElementsContext.elementNoteModalDisplay} 
+          bsPrefix={classes['element-note-modal'] + ' modal'} 
+          show={notableElementModalDisplay} 
           onHide={handleClose}
           onEnter={onEnterHandler}
           onExited={onExitedHandler}
-          size="lg"
+          size='lg'
         >
           <div className={'spinner-wrapper d-flex justify-content-center align-items-center' +(isLoading ? '' : ' visually-hidden')}>
               <div className="spinner-border text-info" role="status"></div>
@@ -61,7 +69,7 @@ function ElementNoteModal() {
               <Modal.Title>Element Description Modal</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-              <div className='content-container' dangerouslySetInnerHTML={{__html: elementNote}} />
+              <div className={classes['content-container']} dangerouslySetInnerHTML={{__html: elementNote}} />
           </Modal.Body>
           <Modal.Footer>
               <Button variant="secondary" onClick={handleClose}>
